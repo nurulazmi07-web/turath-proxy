@@ -7,13 +7,18 @@ const CORS = {
   "Content-Type": "application/json",
 };
 
-// Serve the house app HTML (inlined at build time via Wrangler assets or fetched from same origin)
-async function serveApp(env) {
-  // If bound as a static asset
+async function serveApp(request, env) {
   if (env && env.ASSETS) {
-    return env.ASSETS.fetch(new Request("http://internal/index.html"));
+    const assetUrl = new URL("/index.html", request.url);
+    return env.ASSETS.fetch(new Request(assetUrl.toString()));
   }
-  return new Response("App not found", { status: 404 });
+  return new Response(
+    '<!DOCTYPE html><html lang="id"><body style="font-family:sans-serif;padding:2rem;text-align:center">' +
+    '<h2>Aplikasi Gambar, Hitung &amp; Bangun Rumah</h2>' +
+    '<p>Deploy menggunakan <code>wrangler deploy</code> agar aplikasi dapat diakses.</p>' +
+    '</body></html>',
+    { headers: { "Content-Type": "text/html;charset=UTF-8" } }
+  );
 }
 
 export default {
@@ -26,9 +31,8 @@ export default {
     const path = url.pathname;
     const params = url.searchParams;
 
-    // Serve house app at root
     if (path === "/" || path === "" || path === "/index.html") {
-      return serveApp(env);
+      return serveApp(request, env);
     }
 
     try {

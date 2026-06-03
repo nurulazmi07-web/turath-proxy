@@ -131,6 +131,13 @@ canvas{display:block;cursor:crosshair}
   header h1{font-size:1.1rem}
   .grand-amount,.dv{font-size:1.35rem!important}
 }
+@media print{
+  header,nav,.nav,#pane-gambar,#pane-bangun,.btn,button{display:none!important}
+  #pane-hitung{display:block!important;padding:0}
+  .card{box-shadow:none;border:1px solid #e2e8f0}
+  .rab-grid{grid-template-columns:1fr 1fr}
+  .grand{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 </style>
 </head>
 <body>
@@ -233,7 +240,8 @@ canvas{display:block;cursor:crosshair}
       <label>Biaya/m² Override (opsional)</label>
       <input type="number" id="inp-harga" placeholder="Kosongkan = otomatis" min="1000000" step="100000">
     </div>
-    <div class="fg" style="justify-content:flex-end">
+    <div class="fg" style="justify-content:flex-end;flex-direction:row;gap:.5rem;align-items:flex-end">
+      <button class="btn btn-outline" onclick="resetRAB()">Reset</button>
       <button class="btn btn-primary" onclick="calcRAB()">Hitung RAB</button>
     </div>
   </div>
@@ -262,6 +270,10 @@ canvas{display:block;cursor:crosshair}
         <div class="grand-sub" id="grand-sub"></div>
       </div>
       <div class="grand-amount" id="grand-total">Rp 0</div>
+    </div>
+
+    <div style="text-align:right;margin-top:.75rem">
+      <button class="btn btn-outline" onclick="window.print()" style="font-size:.85rem">Cetak / Simpan PDF</button>
     </div>
   </div>
 </div>
@@ -502,6 +514,14 @@ function sendToCalc() {
     document.getElementById('bl-luas').value=Math.round(total);
   }
   switchTab('hitung');
+}
+
+function resetRAB() {
+  document.getElementById('inp-luas').value=60;
+  document.getElementById('inp-lantai').value=1;
+  document.getElementById('inp-kelas').value='menengah';
+  document.getElementById('inp-harga').value='';
+  document.getElementById('rab-result').style.display='none';
 }
 
 // ──────────────────────────────────────────────
