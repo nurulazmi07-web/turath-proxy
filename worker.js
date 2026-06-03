@@ -7,8 +7,17 @@ const CORS = {
   "Content-Type": "application/json",
 };
 
+// Serve the house app HTML (inlined at build time via Wrangler assets or fetched from same origin)
+async function serveApp(env) {
+  // If bound as a static asset
+  if (env && env.ASSETS) {
+    return env.ASSETS.fetch(new Request("http://internal/index.html"));
+  }
+  return new Response("App not found", { status: 404 });
+}
+
 export default {
-  async fetch(request) {
+  async fetch(request, env) {
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: CORS });
     }
@@ -16,6 +25,11 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
     const params = url.searchParams;
+
+    // Serve house app at root
+    if (path === "/" || path === "" || path === "/index.html") {
+      return serveApp(env);
+    }
 
     try {
       if (path === "/search") {

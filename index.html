@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Gambar, Hitung &amp; Bangun Rumah</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#2d3748;min-height:100vh}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#1a365d,#2b6cb0);color:#fff;padding:1rem 1.5rem;display:flex;align-items:center;gap:1rem}
+header h1{font-size:1.35rem;font-weight:700}
+header p{font-size:.82rem;opacity:.85;margin-top:.15rem}
+
+/* NAV */
+.nav{display:flex;background:#fff;border-bottom:2px solid #e2e8f0;overflow-x:auto}
+.nav-btn{flex:1;min-width:110px;padding:.85rem .5rem;border:none;border-bottom:3px solid transparent;background:none;font-size:.9rem;font-weight:600;color:#718096;cursor:pointer;transition:all .2s;margin-bottom:-2px;white-space:nowrap}
+.nav-btn.active{color:#2b6cb0;border-bottom-color:#2b6cb0}
+.nav-btn:hover:not(.active){background:#f7fafc;color:#2b6cb0}
+
+/* PANES */
+.pane{display:none}
+.pane.active{display:block}
+
+/* COMMON CARD */
+.card{background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:1.25rem}
+.card-title{font-size:.95rem;font-weight:700;color:#2b6cb0;border-bottom:2px solid #bee3f8;padding-bottom:.5rem;margin-bottom:1rem}
+
+/* FORM */
+.form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1rem;margin-bottom:1rem}
+.fg{display:flex;flex-direction:column;gap:.3rem}
+.fg label{font-size:.8rem;font-weight:600;color:#4a5568}
+input[type=number],select{padding:.55rem .75rem;border:2px solid #e2e8f0;border-radius:6px;font-size:.88rem;width:100%;transition:border-color .2s;background:#fff}
+input[type=number]:focus,select:focus{outline:none;border-color:#4299e1}
+
+/* BTN */
+.btn{padding:.6rem 1.2rem;border:none;border-radius:6px;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-primary{background:#2b6cb0;color:#fff}
+.btn-primary:hover{background:#2c5282}
+.btn-outline{background:#edf2f7;color:#4a5568;border:2px solid #e2e8f0}
+.btn-outline:hover{background:#e2e8f0}
+.btn-danger{background:#fff5f5;color:#c53030;border:2px solid #fed7d7}
+.btn-danger:hover{background:#fed7d7}
+.btn-green{background:#f0fff4;color:#276749;border:2px solid #c6f6d5}
+.btn-green:hover{background:#c6f6d5}
+.btn-block{width:100%;display:block}
+
+/* ═══════════════════════ TAB 1: GAMBAR ═══════════════════════ */
+#pane-gambar{padding:1rem}
+.draw-layout{display:flex;gap:.75rem;height:calc(100vh - 175px);min-height:520px}
+
+.draw-left{width:178px;flex-shrink:0;display:flex;flex-direction:column;gap:.75rem;overflow-y:auto}
+.canvas-wrap{flex:1;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08);overflow:hidden;position:relative}
+canvas{display:block;cursor:crosshair}
+.draw-right{width:215px;flex-shrink:0;display:flex;flex-direction:column;gap:.75rem;overflow-y:auto}
+
+/* Tool buttons */
+.tool-btn{display:block;width:100%;padding:.6rem .8rem;border:2px solid #e2e8f0;border-radius:6px;background:#fff;text-align:left;font-size:.85rem;cursor:pointer;margin-bottom:.35rem;transition:all .2s;font-weight:500}
+.tool-btn.active{border-color:#2b6cb0;background:#ebf8ff;color:#2b6cb0;font-weight:700}
+.tool-btn:hover:not(.active){border-color:#90cdf4;background:#f7fafc}
+
+/* Room list */
+.room-item{display:flex;align-items:center;gap:.5rem;padding:.45rem .6rem;border:1px solid #e2e8f0;border-radius:6px;margin-bottom:.3rem;font-size:.8rem;transition:background .15s}
+.room-item:hover{background:#f7fafc}
+.room-swatch{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+.room-meta{flex:1;min-width:0}
+.room-meta-name{font-weight:700;color:#2d3748;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.room-meta-dim{color:#718096;font-size:.73rem}
+.btn-x{background:none;border:none;color:#fc8181;cursor:pointer;font-size:1rem;padding:0 4px;border-radius:4px;line-height:1;flex-shrink:0}
+.btn-x:hover{background:#fff5f5;color:#e53e3e}
+
+.total-box{background:linear-gradient(135deg,#2b6cb0,#4299e1);color:#fff;border-radius:8px;padding:1rem;text-align:center}
+.total-box .tv{font-size:1.75rem;font-weight:700}
+.total-box .tl{font-size:.78rem;opacity:.85;margin-top:.15rem}
+
+.info-pill{background:#edf2f7;border-radius:6px;padding:.5rem .75rem;font-size:.78rem;color:#4a5568;text-align:center;line-height:1.5}
+.coords{background:#2d3748;color:#a0aec0;border-radius:4px;padding:.35rem .6rem;font-size:.75rem;font-family:monospace;text-align:center;margin-top:.4rem}
+
+/* ═══════════════════════ TAB 2: HITUNG ═══════════════════════ */
+#pane-hitung{padding:1.25rem;max-width:960px;margin:0 auto}
+
+.rab-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.rtable{width:100%;border-collapse:collapse;font-size:.85rem}
+.rtable th{background:#ebf8ff;padding:.5rem .75rem;text-align:left;font-weight:700;color:#2b6cb0;border-bottom:2px solid #bee3f8}
+.rtable td{padding:.5rem .75rem;border-bottom:1px solid #e2e8f0}
+.rtable tr:last-child td{border-bottom:none}
+.rtable tr:hover td{background:#f7fafc}
+.tr{text-align:right}
+.fw{font-weight:700}
+.highlight-row td{background:#ebf8ff!important;font-weight:700;color:#2b6cb0}
+
+.grand{background:linear-gradient(135deg,#1a365d,#2b6cb0);color:#fff;border-radius:8px;padding:1.25rem 1.5rem;display:flex;justify-content:space-between;align-items:center;margin-top:1rem}
+.grand-label{font-size:.95rem;font-weight:600}
+.grand-sub{font-size:.78rem;opacity:.8;margin-top:.2rem}
+.grand-amount{font-size:1.75rem;font-weight:700}
+
+/* ═══════════════════════ TAB 3: BANGUN ═══════════════════════ */
+#pane-bangun{padding:1.25rem;max-width:820px;margin:0 auto}
+.build-head{display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end;margin-bottom:1.25rem}
+.build-head .fg{flex:1;min-width:140px}
+
+.timeline{position:relative;padding-left:2.5rem}
+.timeline::before{content:'';position:absolute;left:1rem;top:0;bottom:0;width:2px;background:#bee3f8}
+.tl-item{position:relative;margin-bottom:1.25rem}
+.tl-dot{position:absolute;left:-1.7rem;top:1.1rem;width:14px;height:14px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px #2b6cb0;background:#2b6cb0}
+.ph-card{background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:1.1rem 1.25rem}
+.ph-head{display:flex;align-items:center;gap:.75rem;margin-bottom:.6rem}
+.ph-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;flex-shrink:0}
+.ph-title{font-size:.95rem;font-weight:700;flex:1}
+.ph-dur{font-size:.78rem;color:#718096;font-weight:600;background:#f7fafc;padding:.2rem .65rem;border-radius:20px;white-space:nowrap}
+.ph-desc{font-size:.83rem;color:#4a5568;margin-bottom:.75rem;line-height:1.5}
+.ph-tags{display:flex;flex-wrap:wrap;gap:.35rem}
+.ph-tag{padding:.2rem .6rem;border-radius:20px;font-size:.75rem;font-weight:500}
+
+.dur-total{background:linear-gradient(135deg,#1a365d,#2b6cb0);color:#fff;border-radius:8px;padding:1.25rem 1.5rem;display:flex;justify-content:space-between;align-items:center;margin-top:.5rem}
+.dur-total .dl{font-size:.95rem;font-weight:600}
+.dur-total .ds{font-size:.78rem;opacity:.8;margin-top:.2rem}
+.dur-total .dv{font-size:1.6rem;font-weight:700}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .draw-layout{flex-direction:column;height:auto}
+  .draw-left,.draw-right{width:100%}
+  .canvas-wrap{height:420px}
+  .rab-grid{grid-template-columns:1fr}
+  .grand{flex-direction:column;gap:.5rem;text-align:center}
+  .dur-total{flex-direction:column;gap:.5rem;text-align:center}
+}
+@media(max-width:480px){
+  header h1{font-size:1.1rem}
+  .grand-amount,.dv{font-size:1.35rem!important}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div style="line-height:1.2">
+    <h1>Aplikasi Gambar, Hitung &amp; Bangun Rumah</h1>
+    <p>Rancang denah, estimasi biaya, dan rencanakan pembangunan rumah Anda</p>
+  </div>
+</header>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="switchTab('gambar')">Gambar Denah</button>
+  <button class="nav-btn" onclick="switchTab('hitung')">Hitung RAB</button>
+  <button class="nav-btn" onclick="switchTab('bangun')">Rencana Bangun</button>
+</nav>
+
+<!-- ═══ TAB 1: GAMBAR ═══ -->
+<div id="pane-gambar" class="pane active">
+  <div class="draw-layout">
+
+    <!-- Left sidebar -->
+    <div class="draw-left">
+      <div class="card">
+        <div class="card-title">Alat Gambar</div>
+        <button class="tool-btn active" id="tbtn-draw" onclick="setTool('draw')">Gambar Ruangan</button>
+        <button class="tool-btn" id="tbtn-delete" onclick="setTool('delete')">Hapus Ruangan</button>
+        <hr style="border:none;border-top:1px solid #e2e8f0;margin:.4rem 0">
+        <button class="btn btn-outline btn-block" onclick="clearAll()" style="font-size:.82rem;padding:.5rem">Reset Semua</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Tipe Ruangan</div>
+        <select id="room-type" onchange="currentType=this.value">
+          <option>Ruang Tamu</option>
+          <option>Kamar Tidur</option>
+          <option>Kamar Mandi</option>
+          <option>Dapur</option>
+          <option>Ruang Makan</option>
+          <option>Garasi</option>
+          <option>Teras</option>
+          <option>Ruang Kerja</option>
+          <option>Gudang</option>
+          <option>Lainnya</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="info-pill">1 kotak = 0.5m x 0.5m<br>2 kotak = 1 meter</div>
+        <div class="coords" id="coords">0.0m, 0.0m</div>
+      </div>
+
+      <div class="card">
+        <button class="btn btn-green btn-block" onclick="sendToCalc()">Kirim ke Kalkulator</button>
+      </div>
+    </div>
+
+    <!-- Canvas -->
+    <div class="canvas-wrap" id="canvas-wrap">
+      <canvas id="cvs"></canvas>
+    </div>
+
+    <!-- Right sidebar -->
+    <div class="draw-right">
+      <div class="card" style="flex:1;min-height:0;display:flex;flex-direction:column">
+        <div class="card-title">Daftar Ruangan</div>
+        <div id="room-list" style="flex:1;overflow-y:auto">
+          <p style="color:#a0aec0;font-size:.82rem;text-align:center;padding:1rem 0">Belum ada ruangan.<br>Gambar di kanvas untuk menambah.</p>
+        </div>
+      </div>
+      <div class="total-box">
+        <div class="tv" id="total-val">0 m²</div>
+        <div class="tl">Total Luas Bangunan</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ TAB 2: HITUNG ═══ -->
+<div id="pane-hitung" class="pane">
+  <div class="form-row" style="margin-bottom:0">
+    <div class="fg">
+      <label>Luas Bangunan (m²)</label>
+      <input type="number" id="inp-luas" value="60" min="10" max="100000">
+    </div>
+    <div class="fg">
+      <label>Jumlah Lantai</label>
+      <input type="number" id="inp-lantai" value="1" min="1" max="20">
+    </div>
+    <div class="fg">
+      <label>Kelas Bangunan</label>
+      <select id="inp-kelas">
+        <option value="sederhana">Sederhana (~Rp 3,5 jt/m²)</option>
+        <option value="menengah" selected>Menengah (~Rp 5 jt/m²)</option>
+        <option value="mewah">Mewah (~Rp 8,5 jt/m²)</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Biaya/m² Override (opsional)</label>
+      <input type="number" id="inp-harga" placeholder="Kosongkan = otomatis" min="1000000" step="100000">
+    </div>
+    <div class="fg" style="justify-content:flex-end">
+      <button class="btn btn-primary" onclick="calcRAB()">Hitung RAB</button>
+    </div>
+  </div>
+
+  <div id="rab-result" style="display:none;margin-top:1rem">
+    <div class="rab-grid">
+      <div class="card">
+        <div class="card-title">Kebutuhan Material</div>
+        <table class="rtable">
+          <thead><tr><th>Material</th><th class="tr">Jumlah</th><th>Satuan</th></tr></thead>
+          <tbody id="mat-body"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Rincian Pekerjaan (RAB)</div>
+        <table class="rtable">
+          <thead><tr><th>Pekerjaan</th><th class="tr">Biaya (Rp)</th></tr></thead>
+          <tbody id="rab-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grand">
+      <div>
+        <div class="grand-label">Total Rencana Anggaran Biaya</div>
+        <div class="grand-sub" id="grand-sub"></div>
+      </div>
+      <div class="grand-amount" id="grand-total">Rp 0</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TAB 3: BANGUN ═══ -->
+<div id="pane-bangun" class="pane">
+  <div style="max-width:820px;margin:0 auto">
+    <div class="card" style="margin-bottom:1.25rem">
+      <div class="card-title">Parameter Pembangunan</div>
+      <div class="build-head">
+        <div class="fg">
+          <label>Luas Bangunan (m²)</label>
+          <input type="number" id="bl-luas" value="60" min="10" max="100000" oninput="renderTimeline()">
+        </div>
+        <div class="fg">
+          <label>Jumlah Lantai</label>
+          <input type="number" id="bl-lantai" value="1" min="1" max="20" oninput="renderTimeline()">
+        </div>
+        <div style="padding-bottom:.05rem">
+          <button class="btn btn-primary" onclick="renderTimeline()">Update</button>
+        </div>
+      </div>
+    </div>
+    <div id="tl-container"></div>
+  </div>
+</div>
+
+<script>
+// ──────────────────────────────────────────────
+// TAB SWITCH
+// ──────────────────────────────────────────────
+const TABS = ['gambar','hitung','bangun'];
+function switchTab(name) {
+  TABS.forEach(t => {
+    document.getElementById('pane-'+t).classList.toggle('active', t===name);
+  });
+  document.querySelectorAll('.nav-btn').forEach((b,i) => {
+    b.classList.toggle('active', TABS[i]===name);
+  });
+  if (name==='gambar') setTimeout(resizeCanvas, 30);
+  if (name==='bangun') renderTimeline();
+}
+
+// ──────────────────────────────────────────────
+// DRAWING
+// ──────────────────────────────────────────────
+const SCALE = 40;   // px per meter
+const GRID  = 20;   // px per 0.5m
+
+const RT = {
+  'Ruang Tamu':  { s:'#3182CE', f:'#EBF8FF' },
+  'Kamar Tidur': { s:'#6B46C1', f:'#FAF5FF' },
+  'Kamar Mandi': { s:'#2C7A7B', f:'#E6FFFA' },
+  'Dapur':       { s:'#C05621', f:'#FFFAF0' },
+  'Ruang Makan': { s:'#276749', f:'#F0FFF4' },
+  'Garasi':      { s:'#4A5568', f:'#EDF2F7' },
+  'Teras':       { s:'#744210', f:'#FFFBEB' },
+  'Ruang Kerja': { s:'#2F855A', f:'#F0FFF4' },
+  'Gudang':      { s:'#718096', f:'#F7FAFC' },
+  'Lainnya':     { s:'#718096', f:'#F7FAFC' },
+};
+
+let cvs, ctx, wrap;
+let rooms = [];
+let drawing = false;
+let sx = 0, sy = 0, cx = 0, cy = 0;
+let currentTool = 'draw';
+let currentType = 'Ruang Tamu';
+
+function initCanvas() {
+  cvs  = document.getElementById('cvs');
+  wrap = document.getElementById('canvas-wrap');
+  ctx  = cvs.getContext('2d');
+  resizeCanvas();
+
+  cvs.addEventListener('mousedown', onDown);
+  cvs.addEventListener('mousemove', onMove);
+  cvs.addEventListener('mouseup',   onUp);
+  cvs.addEventListener('mouseleave', () => { if (drawing) { drawing=false; redraw(); } });
+
+  // Touch
+  cvs.addEventListener('touchstart', e => { e.preventDefault(); onDown(e.touches[0]); }, {passive:false});
+  cvs.addEventListener('touchmove',  e => { e.preventDefault(); onMove(e.touches[0]); }, {passive:false});
+  cvs.addEventListener('touchend',   e => { e.preventDefault(); onUp(e.changedTouches[0]); }, {passive:false});
+
+  new ResizeObserver(resizeCanvas).observe(wrap);
+}
+
+function resizeCanvas() {
+  if (!cvs||!wrap) return;
+  cvs.width  = wrap.clientWidth;
+  cvs.height = wrap.clientHeight;
+  redraw();
+}
+
+function snap(v) { return Math.round(v/GRID)*GRID; }
+
+function pos(e) {
+  const r = cvs.getBoundingClientRect();
+  return { x: snap(e.clientX - r.left), y: snap(e.clientY - r.top) };
+}
+
+function onDown(e) {
+  const p = pos(e);
+  if (currentTool==='delete') {
+    const i = rooms.findIndex(r => p.x>=r.x && p.x<=r.x+r.w && p.y>=r.y && p.y<=r.y+r.h);
+    if (i!==-1) { rooms.splice(i,1); redraw(); updatePanel(); }
+    return;
+  }
+  drawing=true; sx=p.x; sy=p.y; cx=p.x; cy=p.y;
+}
+
+function onMove(e) {
+  const p = pos(e);
+  document.getElementById('coords').textContent =
+    (p.x/SCALE).toFixed(1)+'m, '+(p.y/SCALE).toFixed(1)+'m';
+  if (!drawing) return;
+  cx=p.x; cy=p.y; redraw(); drawPreview();
+}
+
+function onUp(e) {
+  if (!drawing) return;
+  drawing=false;
+  const p = pos(e);
+  const rx=Math.min(sx,p.x), ry=Math.min(sy,p.y);
+  const rw=Math.abs(p.x-sx), rh=Math.abs(p.y-sy);
+  if (rw>=GRID*2 && rh>=GRID*2) {
+    rooms.push({x:rx,y:ry,w:rw,h:rh,type:currentType,id:Date.now()});
+    updatePanel();
+  }
+  redraw();
+}
+
+function drawPreview() {
+  const t = RT[currentType]||RT['Lainnya'];
+  const rx=Math.min(sx,cx), ry=Math.min(sy,cy);
+  const rw=Math.abs(cx-sx), rh=Math.abs(cy-sy);
+  ctx.save();
+  ctx.setLineDash([6,3]);
+  ctx.fillStyle = t.f; ctx.fillRect(rx,ry,rw,rh);
+  ctx.strokeStyle=t.s; ctx.lineWidth=2; ctx.strokeRect(rx,ry,rw,rh);
+  ctx.setLineDash([]);
+  if (rw>50&&rh>30) {
+    ctx.fillStyle=t.s; ctx.font='bold 11px Arial'; ctx.textAlign='center';
+    ctx.fillText((rw/SCALE).toFixed(1)+'m x '+(rh/SCALE).toFixed(1)+'m', rx+rw/2, ry+rh/2+4);
+  }
+  ctx.restore();
+}
+
+function redraw() {
+  if (!ctx) return;
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+  drawGrid();
+  rooms.forEach(drawRoom);
+}
+
+function drawGrid() {
+  // 0.5m minor
+  ctx.strokeStyle='#EBF4FF'; ctx.lineWidth=0.5;
+  for (let x=0;x<=cvs.width;x+=GRID) { ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cvs.height);ctx.stroke(); }
+  for (let y=0;y<=cvs.height;y+=GRID) { ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cvs.width,y);ctx.stroke(); }
+  // 1m major
+  ctx.strokeStyle='#BEE3F8'; ctx.lineWidth=1;
+  ctx.fillStyle='#A0AEC0'; ctx.font='10px Arial';
+  for (let x=0;x<=cvs.width;x+=SCALE) {
+    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cvs.height);ctx.stroke();
+    if (x>0) { ctx.textAlign='center'; ctx.fillText(x/SCALE+'m',x,11); }
+  }
+  for (let y=SCALE;y<=cvs.height;y+=SCALE) {
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cvs.width,y);ctx.stroke();
+    ctx.textAlign='left'; ctx.fillText(y/SCALE+'m',3,y-2);
+  }
+}
+
+function drawRoom(r) {
+  const t = RT[r.type]||RT['Lainnya'];
+  ctx.fillStyle=t.f; ctx.strokeStyle=t.s; ctx.lineWidth=2.5;
+  ctx.setLineDash([]);
+  ctx.fillRect(r.x,r.y,r.w,r.h);
+  ctx.strokeRect(r.x,r.y,r.w,r.h);
+  const mcx=r.x+r.w/2, mcy=r.y+r.h/2;
+  ctx.textAlign='center';
+  if (r.w>70&&r.h>50) {
+    ctx.fillStyle=t.s; ctx.font='bold 11px Arial';
+    ctx.fillText(r.type, mcx, mcy-7);
+    ctx.fillStyle='#4A5568'; ctx.font='10px Arial';
+    ctx.fillText((r.w/SCALE).toFixed(1)+'m x '+(r.h/SCALE).toFixed(1)+'m', mcx, mcy+8);
+  } else if (r.w>35&&r.h>25) {
+    ctx.fillStyle=t.s; ctx.font='10px Arial';
+    ctx.fillText((r.w/SCALE).toFixed(1)+'x'+(r.h/SCALE).toFixed(1), mcx, mcy+4);
+  }
+}
+
+function setTool(t) {
+  currentTool = t;
+  document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tbtn-'+t).classList.add('active');
+  cvs.style.cursor = t==='delete'?'not-allowed':'crosshair';
+}
+
+function clearAll() {
+  if (rooms.length===0||confirm('Reset semua ruangan di kanvas?')) {
+    rooms=[]; redraw(); updatePanel();
+  }
+}
+
+function deleteById(id) {
+  rooms=rooms.filter(r=>r.id!==id); redraw(); updatePanel();
+}
+
+function updatePanel() {
+  const list=document.getElementById('room-list');
+  if (rooms.length===0) {
+    list.innerHTML='<p style="color:#a0aec0;font-size:.82rem;text-align:center;padding:1rem 0">Belum ada ruangan.<br>Gambar di kanvas untuk menambah.</p>';
+    document.getElementById('total-val').textContent='0 m²';
+    return;
+  }
+  let total=0;
+  list.innerHTML=rooms.map(r=>{
+    const a=(r.w/SCALE)*(r.h/SCALE); total+=a;
+    const t=RT[r.type]||RT['Lainnya'];
+    return `<div class="room-item">
+      <div class="room-swatch" style="background:${t.s}"></div>
+      <div class="room-meta">
+        <div class="room-meta-name">${r.type}</div>
+        <div class="room-meta-dim">${(r.w/SCALE).toFixed(1)}m x ${(r.h/SCALE).toFixed(1)}m = ${a.toFixed(2)} m²</div>
+      </div>
+      <button class="btn-x" onclick="deleteById(${r.id})" title="Hapus">&#x2715;</button>
+    </div>`;
+  }).join('');
+  document.getElementById('total-val').textContent=total.toFixed(2)+' m²';
+}
+
+function sendToCalc() {
+  const total=rooms.reduce((s,r)=>s+(r.w/SCALE)*(r.h/SCALE),0);
+  if (total>0) {
+    document.getElementById('inp-luas').value=Math.round(total);
+    document.getElementById('bl-luas').value=Math.round(total);
+  }
+  switchTab('hitung');
+}
+
+// ──────────────────────────────────────────────
+// RAB CALCULATOR
+// ──────────────────────────────────────────────
+const HARGA_M2 = { sederhana:3500000, menengah:5000000, mewah:8500000 };
+
+function fmt(n) { return Math.round(n).toLocaleString('id-ID'); }
+
+function calcRAB() {
+  const luas   = parseFloat(document.getElementById('inp-luas').value)||0;
+  const lantai = parseInt(document.getElementById('inp-lantai').value)||1;
+  const kelas  = document.getElementById('inp-kelas').value;
+  const hO     = parseFloat(document.getElementById('inp-harga').value);
+
+  if (luas<=0) { alert('Masukkan luas bangunan yang valid!'); return; }
+
+  const hM2    = hO>0?hO:HARGA_M2[kelas];
+  const totL   = luas*lantai;
+  const totRAB = totL*hM2;
+
+  // Estimasi luas dinding
+  const sisi    = Math.sqrt(luas);
+  const keliling= 4*sisi;
+  const luasDnd = keliling*lantai*3*0.75; // 3m tinggi, 25% bukaan
+
+  // Material
+  const mats = [
+    { n:'Bata Merah',                  q:Math.ceil(luasDnd*70),            u:'buah' },
+    { n:'Semen Portland (50 kg)',       q:Math.ceil(luasDnd*0.32+totL*0.3), u:'sak'  },
+    { n:'Pasir Pasang',                 q:(luasDnd*0.035+totL*0.05).toFixed(1), u:'m³' },
+    { n:'Batu Split (Beton)',           q:(totL*0.06*lantai).toFixed(1),    u:'m³'  },
+    { n:'Besi Beton (dia. 12mm)',       q:Math.ceil(totL*15),               u:'kg'  },
+    { n:'Keramik Lantai 60x60',         q:Math.ceil(totL*1.1),              u:'m²'  },
+    { n:'Genteng (atap)',               q:Math.ceil(luas*1.1*25),           u:'buah' },
+    { n:'Kayu Kaso 5/7 (rangka atap)', q:Math.ceil(luas*0.14),             u:'batang'},
+    { n:'Kabel Listrik NYM 2.5mm',     q:Math.ceil(totL*8),                u:'m'   },
+    { n:'Pipa Air PVC 3/4"',           q:Math.ceil(totL*3),                u:'m'   },
+    { n:'Cat Tembok (Eksterior+Int.)', q:Math.ceil(luasDnd*0.16),          u:'kg'  },
+  ];
+
+  // Pekerjaan
+  const pek = [
+    { n:'Pekerjaan Tanah & Galian',      p:0.05 },
+    { n:'Pondasi Batu Kali / Bored Pile',p:0.10 },
+    { n:'Struktur: Kolom, Balok, Plat',  p:0.18 },
+    { n:'Dinding Bata & Plesteran',      p:0.15 },
+    { n:'Pekerjaan Atap',                p:0.12 },
+    { n:'Kusen, Pintu & Jendela',        p:0.08 },
+    { n:'Lantai (Keramik / Granit)',     p:0.08 },
+    { n:'Plafon (Gypsum / GRC)',         p:0.05 },
+    { n:'Sanitasi & Plumbing',           p:0.08 },
+    { n:'Instalasi Listrik',             p:0.07 },
+    { n:'Finishing & Pengecatan',        p:0.04 },
+  ];
+
+  document.getElementById('mat-body').innerHTML =
+    mats.map(m=>`<tr><td>${m.n}</td><td class="tr fw">${fmt(+m.q)}</td><td>${m.u}</td></tr>`).join('');
+
+  document.getElementById('rab-body').innerHTML =
+    pek.map((p,i)=>`<tr${i===pek.length-1?' class="highlight-row"':''}>
+      <td>${p.n}</td><td class="tr">Rp ${fmt(totRAB*p.p)}</td></tr>`).join('');
+
+  document.getElementById('grand-total').textContent = 'Rp '+fmt(totRAB);
+  document.getElementById('grand-sub').textContent   =
+    'Rp '+fmt(hM2)+'/m² × '+totL+' m² ('+luas+' m² x '+lantai+' lantai)';
+
+  const res=document.getElementById('rab-result');
+  res.style.display='block';
+  setTimeout(()=>res.scrollIntoView({behavior:'smooth',block:'start'}),50);
+}
+
+// ──────────────────────────────────────────────
+// CONSTRUCTION TIMELINE
+// ──────────────────────────────────────────────
+const PHASES = [
+  {
+    title:'Persiapan & Pekerjaan Tanah',
+    desc:'Pembersihan lahan, pengukuran tapak, pemasangan bouwplank, galian tanah, dan urugan pasir.',
+    tags:['Alat ukur','Bouwplank','Cangkul / Excavator','Pasir urug','Tanah timbunan'],
+    color:'#3182CE', factor:1/30
+  },
+  {
+    title:'Pondasi & Sloof Beton',
+    desc:'Pemasangan pondasi batu kali atau cakar ayam, pengecoran sloof beton bertulang.',
+    tags:['Batu kali','Semen','Pasir','Besi 12mm','Bekisting'],
+    color:'#805AD5', factor:1/22
+  },
+  {
+    title:'Struktur: Kolom, Balok & Plat Lantai',
+    desc:'Pembesian kolom dan balok, pemasangan bekisting, pengecoran beton (readymix/site-mix).',
+    tags:['Besi beton','Semen','Batu split','Bekisting kayu','Beton readymix'],
+    color:'#DD6B20', factor:1/18
+  },
+  {
+    title:'Dinding & Rangka Atap',
+    desc:'Pasang bata merah/hebel, plesteran dan acian dinding, pemasangan rangka baja ringan dan penutup atap.',
+    tags:['Bata merah','Semen & pasir','Rangka baja ringan','Genteng','Reng'],
+    color:'#2F855A', factor:1/22
+  },
+  {
+    title:'Plafon, Keramik & Kusen',
+    desc:'Pemasangan rangka dan papan plafon gypsum/GRC, keramik lantai, serta kusen pintu dan jendela.',
+    tags:['Gypsum board','Rangka hollow','Keramik 60x60','Kusen aluminium','Nat keramik'],
+    color:'#C53030', factor:1/26
+  },
+  {
+    title:'Instalasi Listrik, Plumbing & Sanitasi',
+    desc:'Penarikan kabel listrik, pemasangan panel MCB, pipa air bersih/kotor, serta sanitasi kamar mandi.',
+    tags:['Kabel NYM','Pipa PVC','Panel MCB','Closet duduk','Wastafel','Shower'],
+    color:'#2C7A7B', factor:1/35
+  },
+  {
+    title:'Finishing & Pengecatan',
+    desc:'Plamir, pengecatan interior dan eksterior, pemasangan lampu, aksesoris, dan pembersihan akhir.',
+    tags:['Cat tembok','Plamir','Rol & kuas','Lampu LED','Handle pintu','Kaca'],
+    color:'#744210', factor:1/30
+  },
+];
+
+function renderTimeline() {
+  const luas   = parseFloat(document.getElementById('bl-luas').value)||60;
+  const lantai = parseInt(document.getElementById('bl-lantai').value)||1;
+  const totL   = luas*lantai;
+  const mul    = 1+(lantai-1)*0.25;
+
+  let wk=1, html='<div class="timeline">';
+  PHASES.forEach((p,i)=>{
+    const dur = Math.max(2, Math.min(20, Math.ceil(totL*p.factor*mul)));
+    const wEnd= wk+dur-1;
+    html+=`<div class="tl-item">
+      <div class="tl-dot" style="background:${p.color};box-shadow:0 0 0 2px ${p.color}"></div>
+      <div class="ph-card">
+        <div class="ph-head">
+          <div class="ph-num" style="background:${p.color}22;color:${p.color}">${i+1}</div>
+          <div class="ph-title">${p.title}</div>
+          <div class="ph-dur">Minggu ${wk}&ndash;${wEnd} (${dur} mgg)</div>
+        </div>
+        <div class="ph-desc">${p.desc}</div>
+        <div class="ph-tags">
+          ${p.tags.map(t=>`<span class="ph-tag" style="background:${p.color}18;color:${p.color}">${t}</span>`).join('')}
+        </div>
+      </div>
+    </div>`;
+    wk=wEnd+1;
+  });
+  html+='</div>';
+
+  const totalWk=wk-1, totalBln=(totalWk/4.33).toFixed(1);
+  html+=`<div class="dur-total">
+    <div>
+      <div class="dl">Estimasi Total Durasi Pembangunan</div>
+      <div class="ds">Luas total ${totL} m² (${luas} m² x ${lantai} lantai)</div>
+    </div>
+    <div class="dv">${totalWk} minggu &asymp; ${totalBln} bulan</div>
+  </div>`;
+
+  document.getElementById('tl-container').innerHTML=html;
+}
+
+// ──────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', ()=>{
+  initCanvas();
+  renderTimeline();
+});
+window.addEventListener('resize', resizeCanvas);
+</script>
+</body>
+</html>
