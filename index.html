@@ -492,17 +492,17 @@ function updatePanel() {
     return;
   }
   let total=0;
-  list.innerHTML=rooms.map(r=>{
+  list.innerHTML=rooms.map(function(r){
     const a=(r.w/SCALE)*(r.h/SCALE); total+=a;
     const t=RT[r.type]||RT['Lainnya'];
-    return `<div class="room-item">
-      <div class="room-swatch" style="background:${t.s}"></div>
-      <div class="room-meta">
-        <div class="room-meta-name">${r.type}</div>
-        <div class="room-meta-dim">${(r.w/SCALE).toFixed(1)}m x ${(r.h/SCALE).toFixed(1)}m = ${a.toFixed(2)} m²</div>
-      </div>
-      <button class="btn-x" onclick="deleteById(${r.id})" title="Hapus">&#x2715;</button>
-    </div>`;
+    return '<div class="room-item">'+
+      '<div class="room-swatch" style="background:'+t.s+'"></div>'+
+      '<div class="room-meta">'+
+        '<div class="room-meta-name">'+r.type+'</div>'+
+        '<div class="room-meta-dim">'+(r.w/SCALE).toFixed(1)+'m x '+(r.h/SCALE).toFixed(1)+'m = '+a.toFixed(2)+' m²</div>'+
+      '</div>'+
+      '<button class="btn-x" onclick="deleteById('+r.id+')" title="Hapus">&#x2715;</button>'+
+    '</div>';
   }).join('');
   document.getElementById('total-val').textContent=total.toFixed(2)+' m²';
 }
@@ -579,11 +579,15 @@ function calcRAB() {
   ];
 
   document.getElementById('mat-body').innerHTML =
-    mats.map(m=>`<tr><td>${m.n}</td><td class="tr fw">${fmt(+m.q)}</td><td>${m.u}</td></tr>`).join('');
+    mats.map(function(m){
+      return '<tr><td>'+m.n+'</td><td class="tr fw">'+fmt(+m.q)+'</td><td>'+m.u+'</td></tr>';
+    }).join('');
 
   document.getElementById('rab-body').innerHTML =
-    pek.map((p,i)=>`<tr${i===pek.length-1?' class="highlight-row"':''}>
-      <td>${p.n}</td><td class="tr">Rp ${fmt(totRAB*p.p)}</td></tr>`).join('');
+    pek.map(function(p,i){
+      return '<tr'+(i===pek.length-1?' class="highlight-row"':'')+'>'+
+        '<td>'+p.n+'</td><td class="tr">Rp '+fmt(totRAB*p.p)+'</td></tr>';
+    }).join('');
 
   document.getElementById('grand-total').textContent = 'Rp '+fmt(totRAB);
   document.getElementById('grand-sub').textContent   =
@@ -649,35 +653,37 @@ function renderTimeline() {
   const mul    = 1+(lantai-1)*0.25;
 
   let wk=1, html='<div class="timeline">';
-  PHASES.forEach((p,i)=>{
+  PHASES.forEach(function(p,i){
     const dur = Math.max(2, Math.min(20, Math.ceil(totL*p.factor*mul)));
     const wEnd= wk+dur-1;
-    html+=`<div class="tl-item">
-      <div class="tl-dot" style="background:${p.color};box-shadow:0 0 0 2px ${p.color}"></div>
-      <div class="ph-card">
-        <div class="ph-head">
-          <div class="ph-num" style="background:${p.color}22;color:${p.color}">${i+1}</div>
-          <div class="ph-title">${p.title}</div>
-          <div class="ph-dur">Minggu ${wk}&ndash;${wEnd} (${dur} mgg)</div>
-        </div>
-        <div class="ph-desc">${p.desc}</div>
-        <div class="ph-tags">
-          ${p.tags.map(t=>`<span class="ph-tag" style="background:${p.color}18;color:${p.color}">${t}</span>`).join('')}
-        </div>
-      </div>
-    </div>`;
+    html+='<div class="tl-item">'+
+      '<div class="tl-dot" style="background:'+p.color+';box-shadow:0 0 0 2px '+p.color+'"></div>'+
+      '<div class="ph-card">'+
+        '<div class="ph-head">'+
+          '<div class="ph-num" style="background:'+p.color+'22;color:'+p.color+'">'+(i+1)+'</div>'+
+          '<div class="ph-title">'+p.title+'</div>'+
+          '<div class="ph-dur">Minggu '+wk+'&ndash;'+wEnd+' ('+dur+' mgg)</div>'+
+        '</div>'+
+        '<div class="ph-desc">'+p.desc+'</div>'+
+        '<div class="ph-tags">'+
+          p.tags.map(function(t){
+            return '<span class="ph-tag" style="background:'+p.color+'18;color:'+p.color+'">'+t+'</span>';
+          }).join('')+
+        '</div>'+
+      '</div>'+
+    '</div>';
     wk=wEnd+1;
   });
   html+='</div>';
 
   const totalWk=wk-1, totalBln=(totalWk/4.33).toFixed(1);
-  html+=`<div class="dur-total">
-    <div>
-      <div class="dl">Estimasi Total Durasi Pembangunan</div>
-      <div class="ds">Luas total ${totL} m² (${luas} m² x ${lantai} lantai)</div>
-    </div>
-    <div class="dv">${totalWk} minggu &asymp; ${totalBln} bulan</div>
-  </div>`;
+  html+='<div class="dur-total">'+
+    '<div>'+
+      '<div class="dl">Estimasi Total Durasi Pembangunan</div>'+
+      '<div class="ds">Luas total '+totL+' m² ('+luas+' m² x '+lantai+' lantai)</div>'+
+    '</div>'+
+    '<div class="dv">'+totalWk+' minggu &asymp; '+totalBln+' bulan</div>'+
+  '</div>';
 
   document.getElementById('tl-container').innerHTML=html;
 }
